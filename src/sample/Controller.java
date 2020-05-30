@@ -6,10 +6,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Region;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -71,6 +73,12 @@ public class Controller implements Initializable {
     private MenuItem miExit;
 
     @FXML
+    private MenuItem miDelete;
+
+    @FXML
+    private Label lbNameOfSong;
+
+    @FXML
     public void openFile(ActionEvent event) {
         try {
             System.out.println("open file");
@@ -94,6 +102,13 @@ public class Controller implements Initializable {
                 timeSlider.setMax(player.getMedia().getDuration().toMinutes());
 //                System.out.println(player.getMedia().getDuration().toSeconds());
                 timeSlider.setValue(0);
+
+                //audio slider (set volume hiển thị trên thanh slider)
+                audioSlider.setPrefWidth(100);
+                audioSlider.setMaxWidth(Region.USE_PREF_SIZE);
+                audioSlider.setMinWidth(30);
+                audioSlider.setValue(50);
+                player.volumeProperty().bind(audioSlider.valueProperty().divide(100));
 
                 try {
                     btnPlay.setGraphic(new ImageView(new Image(new FileInputStream("src/icons/play.jpg"))));
@@ -121,6 +136,16 @@ public class Controller implements Initializable {
                     if (timeSlider.isPressed()) {
                         double value = timeSlider.getValue();
                         player.seek(new Duration(value *60* 1000));
+                    }
+                }
+            });
+
+            audioSlider.valueProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                    if (audioSlider.isPressed()){
+                        double value=audioSlider.getValue();
+                        player.setVolume(value/100);
                     }
                 }
             });
@@ -175,10 +200,19 @@ public class Controller implements Initializable {
         player.seek(new Duration(duration * 1000));
     }
 
+    //Set button mute click
     @FXML
     void audioClick(ActionEvent event) {
         try {
+            if (!player.isMute()) {
+                player.setMute(true);
+                btnAudio.setGraphic(new ImageView(new Image(new FileInputStream("src/icons/unaudio.png"))));
 
+            } else {
+                player.setMute(false);
+                btnAudio.setGraphic(new ImageView(new Image(new FileInputStream("src/icons/audio.png"))));
+
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -196,9 +230,15 @@ public class Controller implements Initializable {
 
     @FXML
     void stopClick(ActionEvent event) {
+        try {
+            player.seek(Duration.ZERO);
+            player.pause();
+            btnPlay.setGraphic(new ImageView(new Image(new FileInputStream("src/icons/play.jpg"))));
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
 
     //Gán icon cho các button
     @Override
@@ -216,6 +256,7 @@ public class Controller implements Initializable {
             miOpen.setGraphic(new ImageView(new Image(new FileInputStream("src/icons/openfile.png"))));
             miSave.setGraphic(new ImageView(new Image(new FileInputStream("src/icons/save.png"))));
             miExit.setGraphic(new ImageView(new Image(new FileInputStream("src/icons/exit.png"))));
+//            miDelete.setGraphic(new ImageView(new Image(new FileInputStream("src/icons/delete.png"))));
 
         } catch (FileNotFoundException fileNotFoundException) {
             fileNotFoundException.printStackTrace();
