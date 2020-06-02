@@ -18,7 +18,8 @@ public class Main extends Application {
         Image image=new Image(file.toURI().toString());
 
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Mp3 Player");
+
+        primaryStage.setTitle("Windows Media Player");
         primaryStage.getIcons().add(image);
         
         primaryStage.setScene(new Scene(root, 850, 510));
